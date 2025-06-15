@@ -1,131 +1,120 @@
-# CloudBridge Client Installer
+# CloudBridge Relay Client
 
-Установщик для CloudBridge Client - агента для туннелирования TCP-соединений через CloudBridge Relay Server.
+A cross-platform Go implementation of a client for the CloudBridge Relay service. This client allows you to establish secure tunnels through the CloudBridge Relay server using JWT authentication.
 
-## Особенности
+## Features
 
-- Автоматическая установка и настройка
-- Поддержка systemd
-- Автоматическое обновление
-- Настраиваемые пути установки
-- Подробное логирование
-- Проверка системных требований
+- Cross-platform support (Windows, Linux, macOS)
+- Secure TLS connection support
+- JWT token authentication
+- Automatic reconnection handling
+- Graceful shutdown
+- Configurable local port tunneling
+- Comprehensive error handling
 
-## Требования
+## Installation
 
-- Linux с systemd
-- curl
-- root права
-
-## Быстрая установка
+### Using Go Install
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/twogc/cloudbridge-client-installer/main/install.sh | sudo bash
+go install github.com/yourusername/cloudbridge-client/cmd/cloudbridge-client@latest
 ```
 
-## Ручная установка
+### Pre-built Binaries
 
-1. Скачайте установщик:
-```bash
-curl -O https://raw.githubusercontent.com/twogc/cloudbridge-client-installer/main/install.sh
-```
+Download the appropriate binary for your platform from the releases page.
 
-2. Сделайте его исполняемым:
-```bash
-chmod +x install.sh
-```
+## Usage
 
-3. Запустите установку:
-```bash
-sudo ./install.sh
-```
-
-## Опции установки
+### Basic Usage
 
 ```bash
-Usage: install.sh [options]
-
-Options:
-  -h, --help                 Показать справку
-  -v, --version              Показать версию
-  -d, --debug                Включить отладочный вывод
-  --client-version VERSION   Установить конкретную версию (по умолчанию: latest)
-  --install-dir DIR          Директория установки (по умолчанию: /usr/local/bin)
-  --config-dir DIR           Директория конфигурации (по умолчанию: /etc/cloudbridge-client)
-  --data-dir DIR             Директория данных (по умолчанию: /var/lib/cloudbridge-client)
-  --log-dir DIR              Директория логов (по умолчанию: /var/log/cloudbridge-client)
+cloudbridge-client --token "your-jwt-token"
 ```
 
-## Примеры
+This will connect to the default relay server (edge.2gc.ru:8080) with TLS enabled.
 
-Установка конкретной версии:
-```bash
-sudo ./install.sh --client-version 1.0.0
-```
-
-Установка с отладочным выводом:
-```bash
-sudo ./install.sh --debug
-```
-
-Установка в пользовательскую директорию:
-```bash
-sudo ./install.sh --install-dir /opt/cloudbridge-client
-```
-
-## После установки
-
-Клиент будет установлен и запущен как системный сервис. Вы можете управлять им с помощью systemd:
+### Custom Configuration
 
 ```bash
-# Проверить статус
-systemctl status cloudbridge-client
-
-# Посмотреть логи
-journalctl -u cloudbridge-client -f
-
-# Перезапустить сервис
-systemctl restart cloudbridge-client
+cloudbridge-client \
+  --host custom-relay-server.com \
+  --port 8080 \
+  --token "your-jwt-token" \
+  --local-port 3389
 ```
 
-## Конфигурация
-
-Конфигурационный файл находится в `/etc/cloudbridge-client/config.yaml`. После изменения конфигурации перезапустите сервис:
+### With Custom TLS Certificates
 
 ```bash
-sudo systemctl restart cloudbridge-client
+cloudbridge-client \
+  --cert client.crt \
+  --key client.key \
+  --ca ca.crt \
+  --token "your-jwt-token"
 ```
 
-## Обновление
+### Command Line Options
 
-Для обновления до последней версии:
+- `--tls`: Enable TLS connection (default: true)
+- `--cert`: Path to TLS certificate file
+- `--key`: Path to TLS key file
+- `--ca`: Path to CA certificate file
+- `--host`: Relay server hostname (default: edge.2gc.ru)
+- `--port`: Relay server port (default: 8080)
+- `--token`: JWT token for authentication (required)
+- `--local-port`: Local port to tunnel (default: 3389)
+- `--reconnect-delay`: Reconnection delay in seconds (default: 5)
+- `--max-retries`: Maximum number of reconnection attempts (default: 3)
+
+## Platform Support
+
+The client is tested and supported on:
+
+- Windows (x86_64, ARM64)
+- Linux (x86_64, ARM64)
+- macOS (x86_64, ARM64)
+
+## Security Considerations
+
+1. TLS is enabled by default for all connections
+2. Keep your JWT tokens secure and rotate them regularly
+3. Use strong TLS certificates and keys
+4. Validate server certificates using a trusted CA
+
+## Error Handling
+
+The client handles various error conditions:
+
+- Invalid JWT tokens
+- Rate limiting
+- Connection limits
+- Server unavailability
+- TLS certificate issues
+
+## Building from Source
 
 ```bash
-sudo ./install.sh
+git clone https://github.com/yourusername/cloudbridge-client.git
+cd cloudbridge-client
+go build -o cloudbridge-client ./cmd/cloudbridge-client
 ```
 
-Для обновления до конкретной версии:
+### Cross-Platform Build
+
+To build for multiple platforms:
 
 ```bash
-sudo ./install.sh --client-version 1.1.0
+# Windows
+GOOS=windows GOARCH=amd64 go build -o cloudbridge-client.exe ./cmd/cloudbridge-client
+
+# Linux
+GOOS=linux GOARCH=amd64 go build -o cloudbridge-client ./cmd/cloudbridge-client
+
+# macOS
+GOOS=darwin GOARCH=amd64 go build -o cloudbridge-client ./cmd/cloudbridge-client
 ```
 
-## Удаление
+## License
 
-Для удаления клиента:
-
-```bash
-sudo systemctl stop cloudbridge-client
-sudo systemctl disable cloudbridge-client
-sudo rm /etc/systemd/system/cloudbridge-client.service
-sudo rm -rf /etc/cloudbridge-client
-sudo rm -rf /var/lib/cloudbridge-client
-sudo rm -rf /var/log/cloudbridge-client
-sudo rm /usr/local/bin/cloudbridge-client
-sudo userdel cloudbridge-client
-sudo systemctl daemon-reload
-```
-
-## Лицензия
-
-MIT License 
+This project is licensed under the MIT License - see the LICENSE file for details. 
